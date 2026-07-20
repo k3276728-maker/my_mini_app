@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Bentley Rewards</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #14181f;
+    --panel: #1d232d;
+    --panel-raised: #232a35;
+    --brass: #b8935b;
+    --brass-soft: rgba(184, 147, 91, 0.16);
+    --ivory: #ede7da;
+    --slate: #7c8695;
+    --verdigris: #4e8073;
+    --verdigris-soft: rgba(78, 128, 115, 0.18);
+    --radius: 18px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--ink);
+    color: var(--ivory);
+    font-family: 'Manrope', -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    padding: 12px 14px calc(28px + env(safe-area-inset-bottom));
+    min-height: 100vh;
+  }
+
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 4px 16px;
+  }
+
+  .eyebrow-text {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--slate);
+  }
+
+  .eyebrow-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--verdigris);
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--verdigris);
+    box-shadow: 0 0 0 3px var(--verdigris-soft);
+  }
+
+  /* ---- Membership card ---- */
+  .card {
+    background: linear-gradient(180deg, var(--panel-raised), var(--panel));
+    border: 1px solid rgba(184, 147, 91, 0.25);
+    border-radius: var(--radius);
+    padding: 22px 20px 18px;
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(8px);
+    animation: rise 0.5s ease forwards;
+  }
+
+  .card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--brass), transparent);
+  }
+
+  .card-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--brass);
+    margin-bottom: 6px;
+  }
+
+  .balance-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .balance-number {
+    font-family: 'Fraunces', serif;
+    font-size: 56px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  .balance-unit {
+    font-size: 14px;
+    color: var(--slate);
+    font-weight: 500;
+  }
+
+  .perforation {
+    display: flex;
+    gap: 7px;
+    margin: 18px -20px 16px;
+    padding: 0 20px;
+    overflow: hidden;
+  }
+
+  .perforation span {
+    flex: 1;
+    height: 1px;
+    border-bottom: 1px dashed rgba(184, 147, 91, 0.35);
+  }
+
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: var(--slate);
+    margin-bottom: 16px;
+  }
+
+  .stat-row b {
+    color: var(--ivory);
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 500;
+  }
+
+  .ref-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--ink);
+    border: 1px solid rgba(184, 147, 91, 0.2);
+    border-radius: 12px;
+    padding: 10px 12px;
+  }
+
+  .ref-link {
+    flex: 1;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--slate);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .copy-btn {
+    flex-shrink: 0;
+    border: none;
+    background: var(--brass-soft);
+    color: var(--brass);
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.12s ease, background 0.2s ease;
+  }
+
+  .copy-btn:active { transform: scale(0.94); background: rgba(184, 147, 91, 0.3); }
+
+  /* ---- Sections ---- */
+  .section {
+    margin-top: 26px;
+    opacity: 0;
+    transform: translateY(8px);
+    animation: rise 0.5s ease forwards;
+  }
+
+  .section:nth-of-type(2) { animation-delay: 0.08s; }
+  .section:nth-of-type(3) { animation-delay: 0.16s; }
+
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-size: 19px;
+    font-weight: 600;
+    margin: 0 0 4px 2px;
+  }
+
+  .section-sub {
+    font-size: 12px;
+    color: var(--slate);
+    margin: 0 0 12px 2px;
+  }
+
+  .ledger {
+    background: var(--panel);
+    border: 1px solid rgba(184, 147, 91, 0.14);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .ledger-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+  }
+
+  .ledger-row + .ledger-row {
+    border-top: 1px dashed rgba(184, 147, 91, 0.16);
+  }
+
+  .item-title {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .item-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    color: var(--slate);
+    margin-top: 3px;
+  }
+
+  .item-meta b { color: var(--verdigris); }
+  .item-meta b.locked { color: #b56b5a; }
+
+  .buy-btn {
+    flex-shrink: 0;
+    border: none;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 9px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.12s ease, opacity 0.2s ease;
+    background: var(--brass);
+    color: #1a1408;
+  }
+
+  .buy-btn:active { transform: scale(0.94); }
+
+  .buy-btn[disabled] {
+    background: rgba(124, 134, 149, 0.18);
+    color: var(--slate);
+    cursor: default;
+  }
+
+  .rank-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 16px;
+  }
+
+  .rank-row + .rank-row {
+    border-top: 1px dashed rgba(184, 147, 91, 0.16);
+  }
+
+  .rank-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--slate);
+    width: 22px;
+    flex-shrink: 0;
+  }
+
+  .rank-row.top1 .rank-num, .rank-row.top1 .rank-name { color: var(--brass); }
+  .rank-row.top2 .rank-num, .rank-row.top2 .rank-name { color: #cfcfd6; }
+  .rank-row.top3 .rank-num, .rank-row.top3 .rank-name { color: #b98a5e; }
+
+  .rank-name {
+    flex: 1;
+    font-size: 13.5px;
+    font-weight: 600;
+  }
+
+  .rank-count {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--verdigris);
+  }
+
+  .empty {
+    padding: 18px 16px;
+    font-size: 13px;
+    color: var(--slate);
+    text-align: center;
+  }
+
+  .skeleton {
+    background: linear-gradient(90deg, var(--panel) 25%, var(--panel-raised) 37%, var(--panel) 63%);
+    background-size: 400% 100%;
+    animation: shimmer 1.4s ease infinite;
+    border-radius: 10px;
+  }
+
+  @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+  @keyframes rise { to { opacity: 1; transform: translateY(0); } }
+
+  .toast {
+    position: fixed;
+    left: 14px;
+    right: 14px;
+    bottom: calc(18px + env(safe-area-inset-bottom));
+    background: var(--panel-raised);
+    border: 1px solid rgba(184, 147, 91, 0.35);
+    color: var(--ivory);
+    font-size: 13px;
+    padding: 13px 16px;
+    border-radius: 12px;
+    transform: translateY(120%);
+    transition: transform 0.28s ease;
+    z-index: 20;
+  }
+
+  .toast.show { transform: translateY(0); }
+
+  :focus-visible {
+    outline: 2px solid var(--brass);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="eyebrow">
+    <span class="eyebrow-text">Bentley Rewards</span>
+    <span class="eyebrow-dot"><span class="dot"></span>онлайн</span>
+  </div>
+
+  <div class="card" id="balance-card">
+    <div class="card-label">Твой баланс</div>
+    <div class="balance-row">
+      <div class="balance-number" id="balance-number">—</div>
+      <div class="balance-unit">очков</div>
+    </div>
+    <div class="perforation"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+    <div class="stat-row">
+      <span>Всего приглашено за всё время</span>
+      <b id="total-invited">—</b>
+    </div>
+    <div class="ref-box">
+      <span class="ref-link" id="ref-link">загружаю ссылку…</span>
+      <button class="copy-btn" id="copy-btn">Скопировать</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Магазин</div>
+    <div class="section-sub">Списываются очки, награду выдаёт бот</div>
+    <div class="ledger" id="tasks-ledger">
+      <div class="empty">Загружаю товары…</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Топ пригласивших</div>
+    <div class="section-sub">Ранг считается по общему числу приглашений</div>
+    <div class="ledger" id="top-ledger">
+      <div class="empty">Загружаю таблицу…</div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+  const tg = window.Telegram?.WebApp;
+  if (tg) {
+    tg.ready();
+    tg.expand();
+    tg.setHeaderColor('#14181f');
+    tg.setBackgroundColor('#14181f');
+  }
+
+  const initData = tg?.initData || '';
+
+  function haptic(kind) {
+    try {
+      if (kind === 'success') tg.HapticFeedback.notificationOccurred('success');
+      else if (kind === 'error') tg.HapticFeedback.notificationOccurred('error');
+      else tg.HapticFeedback.impactOccurred('light');
+    } catch (e) {}
+  }
+
+  let toastTimer = null;
+  function showToast(text) {
+    const el = document.getElementById('toast');
+    el.textContent = text;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 3200);
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str ?? '';
+    return div.innerHTML;
+  }
+
+  async function loadData() {
+    try {
+      const res = await fetch(`/api/data?initData=${encodeURIComponent(initData)}`);
+      if (!res.ok) throw new Error('bad status ' + res.status);
+      const data = await res.json();
+      renderProfile(data.profile);
+      renderTasks(data.tasks, data.profile.balance);
+      renderTop(data.top);
+    } catch (e) {
+      document.getElementById('tasks-ledger').innerHTML =
+        '<div class="empty">Не удалось загрузить данные. Открой мини-апп через бота ещё раз.</div>';
+      document.getElementById('top-ledger').innerHTML = '';
+    }
+  }
+
+  function renderProfile(profile) {
+    document.getElementById('balance-number').textContent = profile.balance;
+    document.getElementById('total-invited').textContent = profile.total_invited;
+    const refEl = document.getElementById('ref-link');
+    refEl.textContent = profile.ref_link;
+    document.getElementById('copy-btn').onclick = () => {
+      navigator.clipboard?.writeText(profile.ref_link).then(() => {
+        haptic('success');
+        showToast('Ссылка скопирована');
+      }).catch(() => showToast('Не получилось скопировать — скопируй вручную'));
+    };
+  }
+
+  function renderTasks(tasks, balance) {
+    const el = document.getElementById('tasks-ledger');
+    if (!tasks.length) {
+      el.innerHTML = '<div class="empty">Пока нет доступных товаров.</div>';
+      return;
+    }
+    el.innerHTML = tasks.map(t => {
+      const missing = t.required_invites - balance;
+      const meta = t.affordable
+        ? `<b>доступно</b> · нужно ${t.required_invites}`
+        : `<b class="locked">не хватает ${missing}</b> · нужно ${t.required_invites}`;
+      return `
+        <div class="ledger-row">
+          <div style="flex:1">
+            <div class="item-title">${escapeHtml(t.title)}</div>
+            <div class="item-meta">${meta}</div>
+          </div>
+          <button class="buy-btn" data-task-id="${t.id}" ${t.affordable ? '' : 'disabled'}>
+            ${t.affordable ? 'Купить' : 'Заперто'}
+          </button>
+        </div>`;
+    }).join('');
+
+    el.querySelectorAll('.buy-btn[data-task-id]:not([disabled])').forEach(btn => {
+      btn.addEventListener('click', () => buyTask(parseInt(btn.dataset.taskId, 10), btn));
+    });
+  }
+
+  async function buyTask(taskId, btn) {
+    btn.disabled = true;
+    const originalText = btn.textContent;
+    btn.textContent = '…';
+    try {
+      const res = await fetch('/api/buy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ initData, task_id: taskId }),
+      });
+      const result = await res.json();
+      if (result.success) {
+        haptic('success');
+        if (result.needs_ad_content) {
+          showToast('Куплено! Вернись в чат с ботом и пришли содержание рекламы.');
+        } else {
+          showToast(result.message || 'Товар куплен!');
+        }
+        loadData();
+      } else {
+        haptic('error');
+        showToast(result.message || 'Не получилось купить.');
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    } catch (e) {
+      haptic('error');
+      showToast('Ошибка сети. Попробуй ещё раз.');
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  }
+
+  function renderTop(top) {
+    const el = document.getElementById('top-ledger');
+    if (!top.length) {
+      el.innerHTML = '<div class="empty">Пока никто никого не пригласил — будь первым.</div>';
+      return;
+    }
+    el.innerHTML = top.map((row, i) => {
+      const rankClass = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
+      const name = row.username ? '@' + escapeHtml(row.username) : 'id' + row.user_id;
+      return `
+        <div class="rank-row ${rankClass}">
+          <div class="rank-num">${String(i + 1).padStart(2, '0')}</div>
+          <div class="rank-name">${name}</div>
+          <div class="rank-count">${row.count}</div>
+        </div>`;
+    }).join('');
+  }
+
+  loadData();
+</script>
+</body>
+</html>
