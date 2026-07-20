@@ -397,6 +397,7 @@
   }
 
   const initData = tg?.initData || '';
+  const API_BASE = 'https://sekret-production.up.railway.app';
 
   function haptic(kind) {
     try {
@@ -423,7 +424,7 @@
 
   async function loadData() {
     try {
-      const res = await fetch(`/api/data?initData=${encodeURIComponent(initData)}`);
+      const res = await fetch(`${API_BASE}/api/data?initData=${encodeURIComponent(initData)}`);
       if (!res.ok) throw new Error('bad status ' + res.status);
       const data = await res.json();
       renderProfile(data.profile);
@@ -482,7 +483,7 @@
     const originalText = btn.textContent;
     btn.textContent = '…';
     try {
-      const res = await fetch('/api/buy', {
+      const res = await fetch(`${API_BASE}/api/buy`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ initData, task_id: taskId }),
