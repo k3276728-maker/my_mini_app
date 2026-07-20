@@ -243,6 +243,26 @@
   .item-meta b { color: var(--verdigris); }
   .item-meta b.locked { color: #b56b5a; }
 
+  .progress-track {
+    height: 8px;
+    border-radius: 6px;
+    background: rgba(124, 134, 149, 0.18);
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--verdigris), var(--brass));
+    width: 0%;
+    transition: width 0.5s ease;
+  }
+
+  .progress-track.mini {
+    height: 5px;
+    margin-top: 7px;
+  }
+
   .buy-btn {
     flex-shrink: 0;
     border: none;
@@ -369,6 +389,19 @@
     </div>
   </div>
 
+  <div class="section" id="goal-section" style="display:none">
+    <div class="section-title">Ближайшая цель</div>
+    <div class="section-sub" id="goal-sub">Ещё немного — и заберёшь награду</div>
+    <div class="card" id="goal-card" style="padding:18px 18px 16px;">
+      <div class="item-title" id="goal-title" style="font-size:15px;margin-bottom:10px;"></div>
+      <div class="progress-track"><div class="progress-fill" id="goal-fill"></div></div>
+      <div class="stat-row" style="margin-top:8px;margin-bottom:0;">
+        <span id="goal-progress-text"></span>
+        <b id="goal-remaining"></b>
+      </div>
+    </div>
+  </div>
+
   <div class="section">
     <div class="section-title">Магазин</div>
     <div class="section-sub">Списываются очки, награду выдаёт бот</div>
@@ -458,6 +491,7 @@
     }
     el.innerHTML = tasks.map(t => {
       const missing = t.required_invites - balance;
+      const pct = Math.min(100, Math.round((balance / t.required_invites) * 100));
       const meta = t.affordable
         ? `<b>доступно</b> · нужно ${t.required_invites}`
         : `<b class="locked">не хватает ${missing}</b> · нужно ${t.required_invites}`;
@@ -466,6 +500,7 @@
           <div style="flex:1">
             <div class="item-title">${escapeHtml(t.title)}</div>
             <div class="item-meta">${meta}</div>
+            <div class="progress-track mini"><div class="progress-fill" style="width:${pct}%"></div></div>
           </div>
           <button class="buy-btn" data-task-id="${t.id}" ${t.affordable ? '' : 'disabled'}>
             ${t.affordable ? 'Купить' : 'Заперто'}
@@ -476,6 +511,29 @@
     el.querySelectorAll('.buy-btn[data-task-id]:not([disabled])').forEach(btn => {
       btn.addEventListener('click', () => buyTask(parseInt(btn.dataset.taskId, 10), btn));
     });
+
+    renderGoal(tasks, balance);
+  }
+
+  function renderGoal(tasks, balance) {
+    const section = document.getElementById('goal-section');
+    const unlocked = tasks.filter(t => !t.affordable);
+    if (!unlocked.length) {
+      section.style.display = 'none';
+      return;
+    }
+    // Nearest goal = smallest gap to required_invites
+    const nearest = unlocked.reduce((best, t) =>
+      (t.required_invites - balance) < (best.required_invites - balance) ? t : best
+    );
+    const missing = nearest.required_invites - balance;
+    const pct = Math.min(100, Math.round((balance / nearest.required_invites) * 100));
+
+    section.style.display = '';
+    document.getElementById('goal-title').textContent = nearest.title;
+    document.getElementById('goal-fill').style.width = pct + '%';
+    document.getElementById('goal-progress-text').textContent = `${balance} из ${nearest.required_invites} очков`;
+    document.getElementById('goal-remaining').textContent = `осталось ${missing}`;
   }
 
   async function buyTask(taskId, btn) {
