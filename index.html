@@ -38,6 +38,57 @@
     min-height: 100vh;
   }
 
+  /* ---- Tab bar ---- */
+  body.has-tabs {
+    padding-bottom: calc(84px + env(safe-area-inset-bottom));
+  }
+
+  .tab-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    background: linear-gradient(180deg, var(--panel-raised), var(--panel));
+    border-top: 1px solid rgba(184, 147, 91, 0.28);
+    padding: 8px 6px calc(8px + env(safe-area-inset-bottom));
+    z-index: 30;
+  }
+
+  .tab-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    border: none;
+    background: none;
+    color: var(--slate);
+    padding: 6px 2px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: color 0.18s ease, background 0.18s ease;
+  }
+
+  .tab-btn svg { width: 20px; height: 20px; }
+
+  .tab-btn span {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  .tab-btn.active {
+    color: var(--brass);
+    background: var(--brass-soft);
+  }
+
+  .tab-btn:active { transform: scale(0.94); }
+
+  .tab-panel {
+    animation: rise 0.4s ease forwards;
+  }
+
   .eyebrow {
     display: flex;
     align-items: center;
@@ -484,7 +535,7 @@
   }
 </style>
 </head>
-<body>
+<body class="has-tabs">
 
   <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
     <defs>
@@ -537,6 +588,10 @@
         <path d="M9 17.5c1.4 1 4.6 1 6 0"/>
         <path d="M2 12h2M20 12h2"/>
       </symbol>
+      <symbol id="icon-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="8" r="3.4"/>
+        <path d="M5 20c1.5-4 4-6 7-6s5.5 2 7 6"/>
+      </symbol>
     </defs>
   </svg>
 
@@ -551,102 +606,102 @@
     </div>
   </div>
 
-  <div class="card" id="profile-card" style="padding:18px 20px;">
-    <div style="display:flex;align-items:center;gap:12px;">
-      <div id="profile-avatar" class="avatar-badge">?</div>
-      <div style="min-width:0;">
-        <div id="profile-name" style="font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</div>
-        <div id="profile-days" style="font-size:13px;color:var(--slate);margin-top:2px;">—</div>
+  <div class="tab-panel" data-tab="profile">
+    <div class="card" id="profile-card" style="padding:18px 20px;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div id="profile-avatar" class="avatar-badge">?</div>
+        <div style="min-width:0;">
+          <div id="profile-name" style="font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</div>
+          <div id="profile-days" style="font-size:13px;color:var(--slate);margin-top:2px;">—</div>
+        </div>
+      </div>
+      <div class="perforation"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+      <div class="stat-row">
+        <span>Всего приглашено за всё время</span>
+        <b id="profile-total-invited">—</b>
+      </div>
+      <div class="ref-box">
+        <span class="ref-link" id="profile-ref-link">загружаю ссылку…</span>
+        <button class="copy-btn" id="profile-copy-btn">Скопировать</button>
       </div>
     </div>
-    <div class="perforation"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-    <div class="stat-row">
-      <span>Всего приглашено за всё время</span>
-      <b id="profile-total-invited">—</b>
-    </div>
-    <div class="ref-box">
-      <span class="ref-link" id="profile-ref-link">загружаю ссылку…</span>
-      <button class="copy-btn" id="profile-copy-btn">Скопировать</button>
-    </div>
-  </div>
 
-  <div class="card" id="balance-card">
-    <div class="card-label">Твой баланс</div>
-    <div class="balance-row">
-      <div class="balance-number" id="balance-number">—</div>
-      <div class="balance-unit">очков</div>
-    </div>
-    <div style="margin-top:14px;">
-      <div style="font-size:12px;color:var(--slate);margin-bottom:8px;">Купить монеты за Stars · от 5 монет · 2⭐ за 1 монету</div>
-      <div id="stars-presets" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;"></div>
-      <div style="display:flex;gap:8px;">
-        <input id="stars-amount" type="number" min="5" step="1" value="5" inputmode="numeric"
-          style="width:84px;flex-shrink:0;padding:11px 12px;border-radius:12px;border:1px solid rgba(124,134,149,0.28);background:rgba(255,255,255,0.04);color:inherit;font-size:14px;outline:none;">
-        <button class="buy-btn" id="stars-buy-btn" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;">
-          <span>⭐</span><span id="stars-buy-label">Купить за 10 Stars</span>
-        </button>
+    <div class="card" id="balance-card">
+      <div class="card-label">Твой баланс</div>
+      <div class="balance-row">
+        <div class="balance-number" id="balance-number">—</div>
+        <div class="balance-unit">очков</div>
+      </div>
+      <div style="margin-top:14px;">
+        <div style="font-size:12px;color:var(--slate);margin-bottom:8px;">Купить монеты за Stars · от 5 монет · 2⭐ за 1 монету</div>
+        <div id="stars-presets" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;"></div>
+        <div style="display:flex;gap:8px;">
+          <input id="stars-amount" type="number" min="5" step="1" value="5" inputmode="numeric"
+            style="width:84px;flex-shrink:0;padding:11px 12px;border-radius:12px;border:1px solid rgba(124,134,149,0.28);background:rgba(255,255,255,0.04);color:inherit;font-size:14px;outline:none;">
+          <button class="buy-btn" id="stars-buy-btn" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;">
+            <span>⭐</span><span id="stars-buy-label">Купить за 10 Stars</span>
+          </button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="section" id="goal-section" style="display:none">
-    <div class="section-title-row"><div class="icon-chip"><svg><use href="#icon-target"/></svg></div><div class="section-title">Ближайшая цель</div></div>
-    <div class="section-sub" id="goal-sub">Ещё немного — и заберёшь награду</div>
-    <div class="card" id="goal-card" style="padding:18px 18px 16px;">
-      <div class="item-title" id="goal-title" style="font-size:15px;margin-bottom:10px;"></div>
-      <div class="progress-track"><div class="progress-fill" id="goal-fill"></div></div>
-      <div class="stat-row" style="margin-top:8px;margin-bottom:0;">
-        <span id="goal-progress-text"></span>
-        <b id="goal-remaining"></b>
-      </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title-row"><div class="icon-chip"><svg><use href="#icon-gift"/></svg></div><div class="section-title">Магазин</div></div>
-    <div class="section-sub">Списываются очки, награду выдаёт бот</div>
-    <div class="ledger" id="tasks-ledger">
-      <div class="empty">Загружаю товары…</div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title-row"><div class="icon-chip"><svg><use href="#icon-medal"/></svg></div><div class="section-title">Топ пригласивших</div></div>
-    <div class="section-sub">Ранг считается по общему числу приглашений</div>
-    <div class="ledger" id="top-ledger">
-      <div class="empty">Загружаю таблицу…</div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title-row"><div class="icon-chip"><svg><use href="#icon-bot"/></svg></div><div class="section-title">ИИ-помощник</div></div>
-    <div class="section-sub">Отвечает на вопросы о боте мгновенно</div>
-    <div class="card" style="padding:14px;">
-      <div id="ai-log" style="max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding-right:2px;">
-        <div class="empty">Спроси что-нибудь — например, «как купить награду?»</div>
-      </div>
-      <div style="display:flex;gap:8px;margin-top:12px;">
-        <input id="ai-input" type="text" placeholder="Вопрос про бота…" maxlength="2000"
-          style="flex:1;min-width:0;padding:11px 14px;border-radius:12px;border:1px solid rgba(124,134,149,0.28);background:rgba(255,255,255,0.04);color:inherit;font-size:14px;outline:none;">
-        <button id="ai-send" class="buy-btn" style="flex-shrink:0;">Спросить</button>
+    <div class="section" id="goal-section" style="display:none">
+      <div class="section-title-row"><div class="icon-chip"><svg><use href="#icon-target"/></svg></div><div class="section-title">Ближайшая цель</div></div>
+      <div class="section-sub" id="goal-sub">Ещё немного — и заберёшь награду</div>
+      <div class="card" id="goal-card" style="padding:18px 18px 16px;">
+        <div class="item-title" id="goal-title" style="font-size:15px;margin-bottom:10px;"></div>
+        <div class="progress-track"><div class="progress-fill" id="goal-fill"></div></div>
+        <div class="stat-row" style="margin-top:8px;margin-bottom:0;">
+          <span id="goal-progress-text"></span>
+          <b id="goal-remaining"></b>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="section">
-    <div class="section-title-row"><div class="icon-chip"><svg><use href="#icon-chat"/></svg></div><div class="section-title">Чат с поддержкой</div></div>
-    <div class="section-sub">Напишите нам — ответим прямо здесь</div>
-    <div class="card" style="padding:14px;">
-      <div id="chat-log" style="max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding-right:2px;">
-        <div class="empty">Пока нет сообщений — напишите первым.</div>
-      </div>
-      <div style="display:flex;gap:8px;margin-top:12px;">
-        <input id="chat-input" type="text" placeholder="Сообщение…" maxlength="2000"
-          style="flex:1;min-width:0;padding:11px 14px;border-radius:12px;border:1px solid rgba(124,134,149,0.28);background:rgba(255,255,255,0.04);color:inherit;font-size:14px;outline:none;">
-        <button id="chat-send" class="buy-btn" style="flex-shrink:0;">Отправить</button>
+  <div class="tab-panel" data-tab="shop" style="display:none;">
+    <div class="section" style="margin-top:0;">
+      <div class="section-title-row"><div class="icon-chip"><svg><use href="#icon-gift"/></svg></div><div class="section-title">Магазин</div></div>
+      <div class="section-sub">Списываются очки, награду выдаёт бот</div>
+      <div class="ledger" id="tasks-ledger">
+        <div class="empty">Загружаю товары…</div>
       </div>
     </div>
   </div>
+
+  <div class="tab-panel" data-tab="top" style="display:none;">
+    <div class="section" style="margin-top:0;">
+      <div class="section-title-row"><div class="icon-chip"><svg><use href="#icon-medal"/></svg></div><div class="section-title">Топ пригласивших</div></div>
+      <div class="section-sub">Ранг считается по общему числу приглашений</div>
+      <div class="ledger" id="top-ledger">
+        <div class="empty">Загружаю таблицу…</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" data-tab="chat" style="display:none;">
+    <div class="section" style="margin-top:0;">
+      <div class="section-title-row"><div class="icon-chip"><svg><use href="#icon-chat"/></svg></div><div class="section-title">Чат с поддержкой</div></div>
+      <div class="section-sub">Напишите нам — ответим прямо здесь</div>
+      <div class="card" style="padding:14px;">
+        <div id="chat-log" style="max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding-right:2px;">
+          <div class="empty">Пока нет сообщений — напишите первым.</div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px;">
+          <input id="chat-input" type="text" placeholder="Сообщение…" maxlength="2000"
+            style="flex:1;min-width:0;padding:11px 14px;border-radius:12px;border:1px solid rgba(124,134,149,0.28);background:rgba(255,255,255,0.04);color:inherit;font-size:14px;outline:none;">
+          <button id="chat-send" class="buy-btn" style="flex-shrink:0;">Отправить</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="tab-bar" id="tab-bar">
+    <button class="tab-btn active" data-tab="profile"><svg><use href="#icon-user"/></svg><span>Профиль</span></button>
+    <button class="tab-btn" data-tab="shop"><svg><use href="#icon-gift"/></svg><span>Магазин</span></button>
+    <button class="tab-btn" data-tab="top"><svg><use href="#icon-medal"/></svg><span>Топ</span></button>
+    <button class="tab-btn" data-tab="chat"><svg><use href="#icon-chat"/></svg><span>Чат</span></button>
+  </nav>
 
   <div class="toast" id="toast"></div>
 
@@ -661,6 +716,23 @@
 
   const initData = tg?.initData || '';
   const API_BASE = 'https://sekret-production.up.railway.app';
+
+  // ---------- Tabs ----------
+  const tabPanels = document.querySelectorAll('.tab-panel');
+  const tabBtns = document.querySelectorAll('.tab-btn');
+
+  function switchTab(name) {
+    tabPanels.forEach(p => { p.style.display = p.dataset.tab === name ? '' : 'none'; });
+    tabBtns.forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }
+
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      haptic('light');
+      switchTab(btn.dataset.tab);
+    });
+  });
 
   function haptic(kind) {
     try {
@@ -846,76 +918,6 @@
         </div>`;
     }).join('');
   }
-
-  // ---------- AI assistant ----------
-  const aiMessages = []; // { role: 'user' | 'assistant', text }
-
-  function renderAiLog() {
-    const log = document.getElementById('ai-log');
-    if (!aiMessages.length) {
-      log.innerHTML = '<div class="empty">Спроси что-нибудь — например, «как купить награду?»</div>';
-      return;
-    }
-    log.innerHTML = aiMessages.map(m => {
-      const mine = m.role === 'user';
-      return `
-        <div style="align-self:${mine ? 'flex-end' : 'flex-start'};max-width:85%;">
-          <div style="background:${mine ? 'linear-gradient(135deg, var(--verdigris), var(--brass))' : 'rgba(255,255,255,0.06)'};
-                      color:${mine ? '#12161c' : 'inherit'};
-                      padding:9px 13px;border-radius:14px;${mine ? 'border-bottom-right-radius:4px;' : 'border-bottom-left-radius:4px;'}
-                      font-size:14px;line-height:1.4;word-break:break-word;white-space:pre-wrap;">
-            ${escapeHtml(m.text)}
-          </div>
-        </div>`;
-    }).join('');
-    log.scrollTop = log.scrollHeight;
-  }
-
-  async function sendAiMessage() {
-    const input = document.getElementById('ai-input');
-    const text = input.value.trim();
-    if (!text) return;
-    const btn = document.getElementById('ai-send');
-
-    aiMessages.push({ role: 'user', text });
-    renderAiLog();
-    input.value = '';
-    btn.disabled = true;
-    input.disabled = true;
-
-    aiMessages.push({ role: 'assistant', text: '…' });
-    renderAiLog();
-
-    try {
-      const res = await fetch(`${API_BASE}/api/ai/ask`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ initData, message: text }),
-      });
-      const data = await res.json();
-      aiMessages.pop(); // remove the "…" placeholder
-      if (data.success) {
-        aiMessages.push({ role: 'assistant', text: data.reply });
-      } else {
-        aiMessages.push({ role: 'assistant', text: data.message || 'Не получилось ответить.' });
-        haptic('error');
-      }
-    } catch (e) {
-      aiMessages.pop();
-      aiMessages.push({ role: 'assistant', text: 'Ошибка сети. Попробуй ещё раз.' });
-      haptic('error');
-    } finally {
-      renderAiLog();
-      btn.disabled = false;
-      input.disabled = false;
-      input.focus();
-    }
-  }
-
-  document.getElementById('ai-send').addEventListener('click', sendAiMessage);
-  document.getElementById('ai-input').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') sendAiMessage();
-  });
 
   // ---------- Chat ----------
   let lastChatCount = 0;
